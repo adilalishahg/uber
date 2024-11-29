@@ -1,27 +1,33 @@
 
-# User Management System
+# Uber Management System
 
-A RESTful API for user registration and authentication, built with **Node.js**, **Express**, and **MongoDB**.
+A RESTful API for Uber registration and authentication, built with **Node.js**, **Express**, and **MongoDB**.
 
 ## Features
 - User registration with input validation.
 - Secure password hashing using bcrypt.
+- User login with email and password verification.
 - JSON Web Token (JWT) authentication.
+- Retrieve user profile for authenticated users.
+- Logout functionality with token blacklisting.
 - Modular structure for scalability.
 
 ## Project Structure
 
 ```
 ├── controllers/
-│   └── user.controller.js   # Handles business logic for user operations
+│   └── user.controller.js       # Handles business logic for user operations
 ├── models/
-│   └── user.model.js        # Mongoose schema for user data
+│   ├── user.model.js            # Mongoose schema for user data
+│   └── blacklistToken.model.js  # Schema for managing blacklisted tokens
 ├── routes/
-│   └── user.route.js        # Defines routes for user-related endpoints
+│   └── user.route.js            # Defines routes for user-related endpoints
 ├── services/
-│   └── user.service.js      # Service layer for database interactions
-├── app.js                   # Main server file
-└── README.md                # Project documentation
+│   └── user.service.js          # Service layer for database interactions
+├── middlewares/
+│   └── auth.middleware.js       # Middleware for authentication and token validation
+├── app.js                       # Main server file
+└── README.md                    # Project documentation
 ```
 
 ---
@@ -73,6 +79,15 @@ A RESTful API for user registration and authentication, built with **Node.js**, 
 **POST** `/api/users/register`
 
 **Request Body:**
+| Field       | Type   | Required | Validation Rules                          |
+|-------------|--------|----------|-------------------------------------------|
+| `email`     | String | Yes      | Must be a valid email format              |
+| `password`  | String | Yes      | Must be at least 3 characters long        |
+| `username`  | Object | Yes      | Must contain `firstname` and `lastname`   |
+| `firstname` | String | Yes      | Must be at least 2 characters long        |
+| `lastname`  | String | Yes      | Must be at least 2 characters long        |
+
+**Example Request:**
 ```json
 {
   "email": "user@example.com",
@@ -80,6 +95,39 @@ A RESTful API for user registration and authentication, built with **Node.js**, 
     "firstname": "John",
     "lastname": "Doe"
   },
+  "password": "password123"
+}
+```
+
+**Response:**
+  
+```json
+{
+  "user": {
+    "_id": "64e2b0cf...",
+    "fullName": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "user@example.com"
+  },
+  "token": "jwt_token"
+}
+```
+
+#### Login a User
+**POST** `/api/users/login`
+
+**Request Body:**
+| Field       | Type   | Required | Validation Rules                           |
+|-------------|--------|----------|-------------------------------------------|
+| `email`     | String | Yes      | Must be a valid email format              |
+| `password`  | String | Yes      | Must be at least 3 characters long        |
+
+**Example Request:**
+```json
+{
+  "email": "user@example.com",
   "password": "password123"
 }
 ```
@@ -112,17 +160,59 @@ A RESTful API for user registration and authentication, built with **Node.js**, 
 }
 ```
 
+#### Retrieve User Profile
+**GET** `/api/users/profile`
+
+**Headers:**
+| Key            | Value           |
+|-----------------|-----------------|
+| `Authorization`| `Bearer <token>`|
+
+**Response:**
+```json
+{
+  "user": {
+    "_id": "64e2b0cf...",
+    "fullName": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "user@example.com"
+  }
+}
+```
+
+#### Logout a User
+**GET** `/api/users/logout`
+
+**Headers:**
+| Key            | Value           |
+|-----------------|-----------------|
+| `Authorization`| `Bearer <token>`|
+
+**Response:**
+```json
+{
+  "message": "User logged out"
+}
+```
+
+
 ---
 
 ## Code Overview
 
 ### `user.route.js`
-Defines the `/register` endpoint for user registration. Validates input fields using `express-validator`.
+Defines the following endpoints:
+- `/register`: For user registration with input validation.
+- `/login`: For user login with email and password verification.
 
 ### `user.service.js`
-Handles the logic for user registration, including:
-- Validation of required fields.
-- Storing user information in the database.
+Handles the logic for user registration and login.
+
+### `blacklistToken.model.js`
+Mongoose schema for managing blacklisted tokens to ensure invalidated tokens cannot be reused.  
+- Tokens are automatically removed after 24 hours using the `expires` field.
 
 ### `user.model.js`
 Mongoose schema for the user, including:
@@ -131,7 +221,7 @@ Mongoose schema for the user, including:
 - JWT token generation and password comparison methods.
 
 ### `user.controller.js`
-Processes the `/register` request, validates input, hashes the password, and invokes the service layer to create a new user. Generates a JWT token upon successful registration.
+Processes the `/register` and `/login` requests, validates input, hashes the password, and invokes the service layer for database operations. Generates a JWT token upon successful login.
 
 ---
 
@@ -145,9 +235,10 @@ Processes the `/register` request, validates input, hashes the password, and inv
 ---
 
 ## Future Improvements
-- Add user login functionality.
 - Implement role-based access control.
+- Add role-based access control.
 - Add unit and integration tests.
+- Enhance token expiration and refresh token mechanisms.
 
 ---
 
