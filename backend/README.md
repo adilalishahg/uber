@@ -17,13 +17,17 @@ A RESTful API for Uber registration and authentication, built with **Node.js**, 
 ```
 ├── controllers/
 │   └── user.controller.js       # Handles business logic for user operations
+│   └── captain.controller.js       # Handles business logic for captain operations
 ├── models/
 │   ├── user.model.js            # Mongoose schema for user data
+│   ├── captain.model.js            # Mongoose schema for captain data
 │   └── blacklistToken.model.js  # Schema for managing blacklisted tokens
 ├── routes/
 │   └── user.route.js            # Defines routes for user-related endpoints
+│   └── captain.route.js            # Defines routes for captain-related endpoints
 ├── services/
-│   └── user.service.js          # Service layer for database interactions
+│   └── user.service.js          # Service layer for user database interactions
+│   └── captain.service.js          # Service layer for captain database interactions
 ├── middlewares/
 │   └── auth.middleware.js       # Middleware for authentication and token validation
 ├── app.js                       # Main server file
@@ -196,6 +200,67 @@ A RESTful API for Uber registration and authentication, built with **Node.js**, 
   "message": "User logged out"
 }
 ```
+### Captain Routes
+
+#### Register a User
+**POST** `/api/captains/register`
+
+**Request Body:**
+| Field           | Type   | Required | Validation Rules                          |
+|-----------------|--------|----------|-------------------------------------------|
+| `email`         | String | Yes      | Must be a valid email format              |
+| `password`      | String | Yes      | Must be at least 3 characters long        |
+| `fullname`      | Object | Yes      | Must contain `firstname` and `lastname`   |
+| `firstname`     | String | Yes      | Must be at least 2 characters long        |
+| `lastname`      | String | Yes      | Must be at least 2 characters long        |
+| `vehicle`       | String | Yes      | Must contain `color`,`plate`,`capacity`
+                                      | ,`vehicleType` and `model`                |
+                                  
+| `color`         | String | Yes      | Must be at least 2 characters long        |
+| `plate`         | String | Yes      | Must be at least 2 characters long        |
+| `capacity`      | Number | Yes      | Must be at least 2 number long            |
+| `vehicleType `  | String | Yes      | Must be in 'car' 'motorcycle' 'cycle'     |
+
+**Example Request:**
+```json
+{
+  "email": "user@example.com",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "password": "password123",
+  "vehicle": {
+    "color": "red",
+    "plate": "ABC123",
+    "capacity": 5,
+    "vehicleType": "car",
+  }
+}
+```
+
+**Response:**
+  
+```json
+{
+  "captain": {
+    "_id": "64e2b0cf...",
+    "fullName": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "user@example.com",
+    "password":"password",
+    "vehicle": {
+      "color": "red",
+      "plate": "ABC123",
+      "capacity": 5,
+      "vehicleType": "car",
+    }
+  },
+  "token": "jwt_token"
+}
+```
 
 
 ---
@@ -222,6 +287,25 @@ Mongoose schema for the user, including:
 
 ### `user.controller.js`
 Processes the `/register` and `/login` requests, validates input, hashes the password, and invokes the service layer for database operations. Generates a JWT token upon successful login.
+
+
+### `captain.route.js`
+Defines the following endpoints:
+- `/register`: For captain registration with input validation.
+- `/login`: For captain login with email and password verification.
+
+### `captain.service.js`
+Handles the logic for captain registration and login. 
+
+### `captain.model.js`
+Mongoose schema for the captain, including:
+- Validation for fields like `email`, `firstname`, and `lastname`.
+- Password hashing using a static method.
+- JWT token generation and password comparison methods.
+
+### `captain.controller.js`
+Processes the `/register` and `/login` requests, validates input, hashes the password, and invokes the service layer for database operations. Generates a JWT token upon successful login.
+
 
 ---
 
