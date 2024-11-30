@@ -202,7 +202,7 @@ A RESTful API for Uber registration and authentication, built with **Node.js**, 
 ```
 ### Captain Routes
 
-#### Register a User
+#### Register a Captain
 **POST** `/api/captains/register`
 
 **Request Body:**
@@ -261,6 +261,88 @@ A RESTful API for Uber registration and authentication, built with **Node.js**, 
   "token": "jwt_token"
 }
 ```
+#### Login a Captain
+**POST** `/api/captains/login`
+
+**Request Body:**
+| Field       | Type   | Required | Validation Rules                           |
+|-------------|--------|----------|-------------------------------------------|
+| `email`     | String | Yes      | Must be a valid email format              |
+| `password`  | String | Yes      | Must be at least 3 characters long        |
+
+**Example Request:**
+```json
+{
+  "email": "captain@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "user": {
+    "_id": "64e2b0cf...",
+    "fullName": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "captain@example.com",
+    "password":"passwords",
+    "vehicle": {
+      "color": "red",
+      "plate": "ABC123",
+      "capacity": 5,
+      "vehicleType": "car",
+    }
+  },
+  "token": "jwt_token"
+}
+```
+
+#### Retrieve User Profile
+**GET** `/api/users/profile`
+
+**Headers:**
+| Key            | Value           |
+|-----------------|-----------------|
+| `Authorization`| `Bearer <token>`|
+
+**Response:**
+```json
+{
+  "user": {
+    "_id": "64e2b0cf...",
+    "fullName": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "captain@example.com",
+    "password":"passwords",
+    "vehicle": {
+      "color": "red",
+      "plate": "ABC123",
+      "capacity": 5,
+      "vehicleType": "car",
+    }
+  }
+}
+```
+
+#### Logout a Captain
+**GET** `/api/captains/logout`
+
+**Headers:**
+| Key            | Value           |
+|-----------------|-----------------|
+| `Authorization`| `Bearer <token>`|
+
+**Response:**
+```json
+{
+  "message": "Captain logged out"
+}
+```
 
 
 ---
@@ -304,7 +386,7 @@ Mongoose schema for the captain, including:
 - JWT token generation and password comparison methods.
 
 ### `captain.controller.js`
-Processes the `/register` and `/login` requests, validates input, hashes the password, and invokes the service layer for database operations. Generates a JWT token upon successful login.
+Processes the `/register`,`/profile`,`logout` and `/login` requests, validates input, hashes the password, and invokes the service layer for database operations. Generates a JWT token upon successful login.
 
 
 ---
