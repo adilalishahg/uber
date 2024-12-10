@@ -26,7 +26,7 @@ router.post(
     body("vehicle.capacity")
       .isLength({ min: 1 })
       .withMessage("Vehicle plate must be at least 1 characters long"),
-    body("vehicle.vehicleType")
+    body("vehicle.type")
       .isIn(["car", "motorcycle", "bicycle"])
       .withMessage("Invalid vehicle type"),
   ],

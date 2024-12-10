@@ -1,29 +1,42 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { UserDataContext } from "../context/userContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setuserData] = useState("");
-  const submitHandler = (e) => {
+  const { user, setUser } = useContext(UserDataContext);
+  const navigate = useNavigate();
+
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setuserData({ email: email, password: password });
-    console.log(userData);
+    const user = { email: email, password: password };
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/login`,
+      user
+    );
+    if (response.status === 200) {
+      setUser(response.data);
+      const data = response.data;
+      localStorage.setItem("token", data.token);
+      navigate("/home");
+    }
     setEmail("");
     setPassword("");
   };
   return (
-    <div className="p-7 flex flex-col justify-between h-screen">
+    <div className="flex flex-col justify-between h-screen p-7">
       <div>
         <div className="relative w-24 h-16 mb-10 bg-transparent">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaI0-AaIAcwVCkcnR8xdetso-wz9rCOVJB5Q&s"
             alt="Uber Logo"
-            className="absolute inset-0 w-full h-full object-contain mix-blend-lighten"
+            className="absolute inset-0 object-contain w-full h-full mix-blend-lighten"
           />
         </div>
         <form onSubmit={submitHandler}>
-          <h3 className="text-lg font-medium mb-2">What's your email</h3>
+          <h3 className="mb-2 text-lg font-medium">What's your email</h3>
           <input
             required
             value={email}
@@ -32,7 +45,7 @@ const UserLogin = () => {
             type="email"
             placeholder="a@email.com"
           />
-          <h3 className="text-lg font-medium mb-2">Enter Password</h3>
+          <h3 className="mb-2 text-lg font-medium">Enter Password</h3>
           <input
             required
             value={password}

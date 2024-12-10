@@ -8,7 +8,7 @@ router.post(
   "/register",
   [
     body("email").isEmail().withMessage("Please enter a valid email"),
-    body("username.firstname")
+    body("fullname.firstname")
       .isLength({ min: 3 })
       .withMessage("Please enter a valid firstname"),
     body("password")
